@@ -1,7 +1,7 @@
 # META NAME ketea-theme-plugin
 # META DESCRIPTION the ketea-theme-plugin provides a theme for pure data
 # META AUTHOR monetus
-# META VERSION 0.0.3
+# META VERSION 0.0.4
 # META LICENSE "Standard Improved BSD License", "BSD 3-Clause License"
 
 
@@ -10,7 +10,7 @@ package require pd_bindings
 package require pdtk_text
 package require pdwindow
 
-package provide ketea 0.0.3
+package provide ketea 0.0.4
 
 #I've taken to just reassigning the colors, but its definitely confusing because,\
  while they still corellate to options, they should be renamed to describe \
