@@ -16,18 +16,18 @@ package provide ketea 0.0.4
  while they still corellate to options, they should be renamed to describe \
  the edit & run mode changes.  Maybe make an advanced menu?
 namespace eval themed:: {
-  variable bg #fff
-    variable fg #000
-    variable active_fg #000
-    variable active_bg #aaa
-    variable hl #000
+  variable bg #ffffff
+    variable fg #000000
+    variable active_fg #000000
+    variable active_bg #aaaaaa
+    variable hl #000000
     variable hl_bg #C6FFFF
-    variable disabled_fg #000
-    variable insert_bg #fff
-    variable sel #aaa
-    variable sel_fg #000
+    variable disabled_fg #000000
+    variable insert_bg #ffffff
+    variable sel #aaaaaa
+    variable sel_fg #000000
     variable sel_bg #C6FFFF
-    variable trough #000; #not a single thing with this on mac so far.
+    variable trough #000000; #not a single thing with this on mac so far.
   variable all_color_options "\
    -background themed::bg\
    -foreground themed::fg\
@@ -102,7 +102,7 @@ namespace eval themed:: {
   }
   proc configure_tk_palette {} {
     # notice that insertbackground is hl for the sake of the cursor\
-              and disabledForeground is fg for the sake of dialogWindow text.\
+              and disabledForeground is fg for the sake of dialogWindow text\
               should probably get away from this.
     tk_setPalette\
         background $themed::bg\
@@ -190,7 +190,16 @@ proc overwrite_pd_color_procs {} {
     if {[info complete $tclentry]} {
         .pdwindow.tcl.entry configure -background $themed::bg
     } else {
-        .pdwindow.tcl.entry configure -background $themed::sel
+      scan $themed::bg #%2x%2x%2x BGr BGg BGb
+      set BGr [expr {$BGr-($BGr/4)}]
+      set BGg [expr {$BGg-($BGg/4)}]
+      set BGb [expr {$BGb-($BGb/4)}]
+
+      set darker_bg ""
+      append darker_bg #\
+        [string trim [format %02X $BGr]] [string trim [format %02X $BGg]] [string trim [format %02X $BGb]]
+
+        .pdwindow.tcl.entry configure -background $darker_bg
     }
   }
 
@@ -203,36 +212,14 @@ proc overwrite_pd_color_procs {} {
     # log2 messages are the foreground color
     .pdwindow.text.internal tag configure log3 -foreground $themed::active_bg
 
-    # #fff becomes #FFFFFF, probably doing this badly.
-    if {[string length $themed::bg] == 4} {
-      # have a feeling there is a smarter way to do this.
-      set rgb_hex_bg ""
-      append rgb_hex_bg # [string index $themed::bg 1]\
-                          [string index $themed::bg 1]\
-                          [string index $themed::bg 2]\
-                          [string index $themed::bg 2]\
-                          [string index $themed::bg 3]\
-                          [string index $themed::bg 3]
-    } else {set rgb_hex_bg $themed::bg}
+    scan $themed::fg #%2x%2x%2x FGr FGg FGb
+    scan $themed::bg #%2x%2x%2x BGr BGg BGb
 
-    if {[string length $themed::fg] == 4} {
-      set rgb_hex_fg ""
-      append rgb_hex_fg # [string index $themed::fg 1]\
-                          [string index $themed::fg 1]\
-                          [string index $themed::fg 2]\
-                          [string index $themed::fg 2]\
-                          [string index $themed::fg 3]\
-                          [string index $themed::fg 3]
-    } else {set rgb_hex_fg $themed::fg}
-
-    scan $rgb_hex_fg #%2x%2x%2x FGr FGg FGb
-    scan $rgb_hex_bg #%2x%2x%2x BGr BGg BGb
-
-    # divide by twenty one to give a little extra room, make sure its a float and the bounds are 0-255\
+    # divide by twenty three to give a little extra room, make sure its a float and the bounds are 0-255\
           times -1 to decr instead of incr
-    set FGr_i [expr {int( ($FGr-$BGr) / 21.)* -1}]
-    set FGg_i [expr {int( ($FGg-$BGg) / 21.)* -1}]
-    set FGb_i [expr {int( ($FGb-$BGb) / 21.)* -1}]
+    set FGr_i [expr {int( ($FGr-$BGr) / -23.)}]
+    set FGg_i [expr {int( ($FGg-$BGg) / -23.)}]
+    set FGb_i [expr {int( ($FGb-$BGb) / -23.)}]
 
     # 0-20(4-24) is a rough useful range of 'verbose' levels for impl debugging
     set start 4
