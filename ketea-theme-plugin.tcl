@@ -168,7 +168,7 @@ namespace eval themed:: {
   }
   proc configure_misc_options {} {
     option add *Button.Foreground $themed::active_fg
-    option add *Memu.Foreground $themed::active_fg
+    option add *Menu.Foreground $themed::active_fg
     if {[winfo exists .menubar]} {
       .menubar configure -foreground $themed::active_fg
       themed::recurse_and_configure_foreground .menubar $themed::active_fg
