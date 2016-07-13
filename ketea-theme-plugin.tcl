@@ -277,10 +277,10 @@ proc overwrite_pd_color_procs {} {
 proc enact_theme_menu {} {
   # look into whether the c ties are necessary
 
-  namespace eval dialog_theme {}
+  namespace eval dialog_theme:: {variable ketea_loadpath $::current_plugin_loadpath}
   #-----load and save configuration file--------
   proc dialog_theme::load_palette_colors_from_file {} {
-    set palette_file [file join $::current_plugin_loadpath palette.tcllist]
+    set palette_file [file join $dialog_theme::ketea_loadpath palette.tcllist]
     if {[file isfile $palette_file]} {
       #open a read-only channel to palette.tcllist
       set channel_id [open $palette_file r]
@@ -313,7 +313,7 @@ proc enact_theme_menu {} {
 
   proc dialog_theme::save_palette_colors_to_file {} {
     #location of file
-    set palette_file [file join $::current_plugin_loadpath palette.tcllist]
+    set palette_file [file join $dialog_theme::package_location palette.tcllist]
 
     #open a write-only channel to palette.tcllist
     set channel_id [open $palette_file w]
@@ -596,7 +596,6 @@ themed::configure_tk_palette
 themed::configure_the_backgrounds $themed::bg
 themed::configure_misc_options
 bind PatchWindow <<EditMode>> {+themed::configure_upon_editmode %W}
-
       #r                                #e
     #themed::trough      "overlay"    themed::active_fg
     #themed::sel         "inlay"      themed::active_bg
