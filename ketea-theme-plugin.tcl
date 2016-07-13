@@ -160,10 +160,8 @@ namespace eval themed:: {
   }
   proc recurse_and_configure_foreground {window color} {
     foreach child [winfo children $window] {
-      if {$child ne ""} {
-        $child configure -foreground $color
-        themed::recurse_and_configure_foreground $child $color
-      }
+      $child configure -foreground $color
+      themed::recurse_and_configure_foreground $child $color
     }
   }
   proc configure_misc_options {} {
