@@ -158,19 +158,28 @@ namespace eval themed:: {
     # the background of text windows like .aboutPd
     option add *Text.Background $themed::bg
   }
-  proc configure_misc_options {} {
-    if {[winfo exists .menubar]} {
-      foreach child [winfo children .menubar] {
-        $child configure -foreground $themed::active_fg
+  proc recurse_and_configure_foreground {window color} {
+    foreach child [winfo children $window] {
+      if {$child ne ""} {
+        $child configure -foreground $color
+        themed::recurse_and_configure_foreground $child $color
       }
+    }
+  }
+  proc configure_misc_options {} {
+    option add *Button.Foreground $themed::active_fg
+    option add *Memu.Foreground $themed::active_fg
+    if {[winfo exists .menubar]} {
+      .menubar configure -foreground $themed::active_fg
+      themed::recurse_and_configure_foreground .menubar $themed::active_fg
     }
     if {[winfo exists .openrecent]} {
       .openrecent configure -foreground $themed::active_fg
     }
     if {[winfo exists .popup]} {
       .popup configure -foreground $themed::active_fg
+      themed::recurse_and_configure_foreground .popup $themed::active_fg
     }
-    option add *Button.Foreground $themed::active_fg
   }
 }
 
