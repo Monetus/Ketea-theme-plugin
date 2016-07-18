@@ -59,7 +59,6 @@ namespace eval themed:: {
     # these don't log errors but they quietly fail, they need a proper glob
 
     $tkcanvas configure -background $themed::bg
-    #need to add gop tag
     #msg & label have text tag too
     $tkcanvas itemconfigure {cord || graph || obj} -fill $themed::active_fg
     $tkcanvas itemconfigure commentbar -fill $themed::active_fg
@@ -101,6 +100,10 @@ namespace eval themed:: {
     }
   }
   proc configure_tk_palette {} {
+    #BUG: this is causing a buildup of the hexcols and theme button displays \
+      in a list that are configured on every apply press...\
+        wtf, must find a way to fix.
+
     # notice that insertbackground is hl for the sake of the cursor\
               and disabledForeground is fg for the sake of dialogWindow text\
               should probably get away from this.
@@ -119,7 +122,8 @@ namespace eval themed:: {
         troughColor $themed::trough
   }
   proc configure_the_backgrounds {color} {
-    #these aren't being colored by the option database for some reason
+    #these aren't being colored by the option database for some reason\
+      probably created before gui_plugins are loaded.
     .pdwindow.header configure -background $color
     .pdwindow.header.dsp configure -background $color
     .pdwindow.header.loglabel configure -background $color
@@ -165,8 +169,13 @@ namespace eval themed:: {
     }
   }
   proc configure_misc_options {} {
+    .pdwindow.header.logmenu configure -foreground $themed::active_fg
+    .pdwindow.header.logmenu.menu configure -foreground $themed::active_fg
     option add *Button.Foreground $themed::active_fg
     option add *Menu.Foreground $themed::active_fg
+    option add *Menubutton.Foreground $themed::active_fg
+    #recurse through introspection rather than list specific things to color,\
+      to account for any other gui_plugins' additions.
     if {[winfo exists .menubar]} {
       .menubar configure -foreground $themed::active_fg
       themed::recurse_and_configure_foreground .menubar $themed::active_fg
@@ -195,7 +204,7 @@ proc overwrite_pd_color_procs {} {
   proc ::pdwindow::validate_tcl {} {
     variable tclentry
     if {[info complete $tclentry]} {
-        .pdwindow.tcl.entry configure -background $themed::bg
+      .pdwindow.tcl.entry configure -background $themed::bg
     } else {
       scan $themed::bg #%2x%2x%2x BGr BGg BGb
       set BGr [expr {$BGr-($BGr/4)}]
@@ -206,7 +215,7 @@ proc overwrite_pd_color_procs {} {
       append darker_bg #\
         [string trim [format %02X $BGr]] [string trim [format %02X $BGg]] [string trim [format %02X $BGb]]
 
-        .pdwindow.tcl.entry configure -background $darker_bg
+      .pdwindow.tcl.entry configure -background $darker_bg
     }
   }
 
@@ -410,10 +419,10 @@ proc enact_theme_menu {} {
         -command "dialog_theme::log_last_checked_checkbutton \
                   $mytoplevel.check2_$color [$mytoplevel.colbox_r_$color cget -background]"
       grid configure $mytoplevel.label_$color -column 0 -row $::dialog_theme::row_iterator -rowspan 2
-      grid configure $mytoplevel.check1_$color -column 1 -row $::dialog_theme::row_iterator
-      grid configure $mytoplevel.check2_$color -column 2 -row $::dialog_theme::row_iterator
-      grid configure $mytoplevel.colbox_e_$color -column 1 -row [expr $::dialog_theme::row_iterator+1]
-      grid configure $mytoplevel.colbox_r_$color -column 2 -row [expr $::dialog_theme::row_iterator+1]
+      grid configure $mytoplevel.check1_$color -column 1 -row $::dialog_theme::row_iterator -sticky e
+      grid configure $mytoplevel.check2_$color -column 2 -row $::dialog_theme::row_iterator -sticky e
+      grid configure $mytoplevel.colbox_e_$color -column 1 -row [expr $::dialog_theme::row_iterator+1] -sticky e
+      grid configure $mytoplevel.colbox_r_$color -column 2 -row [expr $::dialog_theme::row_iterator+1] -sticky e
       incr ::dialog_theme::row_iterator 2
     }
   }
