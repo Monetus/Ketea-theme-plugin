@@ -1,17 +1,16 @@
 # META NAME ketea-theme-plugin
 # META DESCRIPTION the ketea-theme-plugin provides a theme for pure data
 # META AUTHOR monetus
-# META VERSION 0.0.4
+# META VERSION 0.0.5
 # META LICENSE "Standard Improved BSD License", "BSD 3-Clause License"
 
-# NEED TO RECOLOR THE THEME BUTTON DISPLAYS UPON APPLY
-
-#package require Tk 8.5
+package require Tk 8.4
 package require pd_bindings
 package require pdtk_text
 package require pdwindow
+package require pd_menucommands
 
-package provide ketea 0.0.4
+package provide ketea 0.0.5
 
 #I've taken to just reassigning the colors, but its definitely confusing because,\
  while they still corellate to options, they should be renamed to describe \
@@ -484,8 +483,6 @@ proc enact_theme_menu {} {
 
       labelframe $gfxstub.labelframe -text "Choose your palette"\
         -relief groove -padx 5 -pady 5 -labelanchor n -takefocus 1
-      #really have no idea why this errors when used upon instantiation, so config
-      #$gfxstub.labelframe configure -style ketea.TLabelframe
 
       button $gfxstub.save -text [_ "save"]\
         -command {dialog_theme::ok .theme}
@@ -494,7 +491,7 @@ proc enact_theme_menu {} {
       button $gfxstub.cancel -text [_ "cancel"]\
         -command {dialog_theme::cancel .theme}
         # the gfxstub variable will have been unset, you have to be specific
-        #   and say .theme for the command's argument ... i think
+        #   and say .theme for the command's argument
 
       set ::dialog_theme::row_iterator 1
       dialog_theme::add_theme_buttons $gfxstub.labelframe
@@ -533,9 +530,6 @@ proc enact_theme_menu {} {
       grid $gfxstub.labelframe -column 0 -columnspan 3 -row 0 -rowspan 3 -sticky new
 
       unset ::dialog_theme::row_iterator
-      #grid anchor $gfxstub.labelframe center
-      #grid anchor $gfxstub.apply w
-      #grid anchor $gfxstub.cancel e
 
       # todo:  add sizegrip
          # test and configure weights
@@ -549,10 +543,6 @@ proc enact_theme_menu {} {
       #grid rowconfigure $gfxstub 3 -weight 1
       #grid rowconfigure $gfxstub 4 -weight 0
 
-      #raise $gfxstub
-      #if {$::focused_window ne $gfxstub} {
-      #  focus $gfxstub
-      #}
       #tkwait window $gfxstub
     }
   }
