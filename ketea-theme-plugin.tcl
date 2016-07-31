@@ -4,6 +4,7 @@
 # META VERSION 0.0.4
 # META LICENSE "Standard Improved BSD License", "BSD 3-Clause License"
 
+# NEED TO RECOLOR THE THEME BUTTON DISPLAYS UPON APPLY
 
 #package require Tk 8.5
 package require pd_bindings
@@ -101,8 +102,9 @@ namespace eval themed:: {
   }
   proc configure_tk_palette {} {
     #BUG: this is causing a buildup of the hexcols and theme button displays \
-      in a list that are configured on every apply press...\
-        wtf, must find a way to fix.
+      in a list that are configured on every apply press..?\
+        wtf, must find a way to fix.\
+        This shit messes up other dialogWindows' hexcols as well.
 
     # notice that insertbackground is hl for the sake of the cursor\
               and disabledForeground is fg for the sake of dialogWindow text\
@@ -275,6 +277,36 @@ proc overwrite_pd_color_procs {} {
         $tkcanvas bind $mytag <Control-e> "$tkcanvas icursor $mytag end"
     }
   }
+
+  proc ::pd_menucommands::menu_aboutpd {} {
+    # parse the textfile for the About Pd page
+      set versionstring "Pd $::PD_MAJOR_VERSION.$::PD_MINOR_VERSION.$::PD_BUGFIX_VERSION$::PD_TEST_VERSION"
+      set filename "$::sys_libdir/doc/1.manual/1.introduction.txt"
+      if {[winfo exists .aboutpd]} {
+          wm deiconify .aboutpd
+          raise .aboutpd
+      } else {
+          toplevel .aboutpd -class TextWindow
+          wm title .aboutpd [_ "About Pd"]
+          wm group .aboutpd .
+          .aboutpd configure -menu $::dialog_menubar
+          text .aboutpd.text -relief flat -borderwidth 0 \
+              -yscrollcommand ".aboutpd.scroll set" -background $themed::bg -selectforeground $themed::hl
+          scrollbar .aboutpd.scroll -command ".aboutpd.text yview"
+          pack .aboutpd.scroll -side right -fill y
+          pack .aboutpd.text -side left -fill both -expand 1
+          bind .aboutpd <$::modifier-Key-w>   "wm withdraw .aboutpd"
+
+          set textfile [open $filename]
+          while {![eof $textfile]} {
+              set bigstring [read $textfile 1000]
+              regsub -all PD_BASEDIR $bigstring $::sys_guidir bigstring2
+              regsub -all PD_VERSION $bigstring2 $versionstring bigstring3
+              .aboutpd.text insert end $bigstring3
+          }
+          close $textfile
+      }
+  }
 }
 
 proc enact_theme_menu {} {
@@ -382,10 +414,8 @@ proc enact_theme_menu {} {
 
     #if this foreach pair looks weird its because the variables r, hexcols, & i are being instantiated \
         with a list to iterate through.  Very nifty foreach in tcl.
-    foreach r {0 1 2} hexcols {
-      { "#FFFFFF" "#DFDFDF" "#BBBBBB" "#FFC7C6" "#FFE3C6" "#FEFFC6" "#C6FFC7" "#C6FEFF" "#C7C6FF" "#E3C6FF" }
-      { "#9F9F9F" "#7C7C7C" "#606060" "#FF0400" "#FF8300" "#FAFF00" "#00FF04" "#00FAFF" "#0400FF" "#9C00FF" }
-      { "#404040" "#202020" "#000000" "#551312" "#553512" "#535512" "#0F4710" "#0E4345" "#131255" "#2F004D" } } \
+
+    foreach r {0 1 2} hexcols $::dialog_theme::hexcols \
     {
       frame $mytoplevel.colors.r$r
       grid $mytoplevel.colors.r$r -sticky n
@@ -434,6 +464,11 @@ proc enact_theme_menu {} {
       raise $gfxstub
       focus $gfxstub
     } else {
+      set ::dialog_theme::hexcols {
+        { "#FFFFFF" "#DFDFDF" "#BBBBBB" "#FFC7C6" "#FFE3C6" "#FEFFC6" "#C6FFC7" "#C6FEFF" "#C7C6FF" "#E3C6FF" }
+        { "#9F9F9F" "#7C7C7C" "#606060" "#FF0400" "#FF8300" "#FAFF00" "#00FF04" "#00FAFF" "#0400FF" "#9C00FF" }
+        { "#404040" "#202020" "#000000" "#551312" "#553512" "#535512" "#0F4710" "#0E4345" "#131255" "#2F004D" } }
+
       set ::dialog_theme::palette_colors "Overlay $themed::active_fg $themed::trough\
                                           Inlay $themed::active_bg $themed::sel\
                                           Background $themed::bg $themed::insert_bg\
@@ -526,7 +561,7 @@ proc enact_theme_menu {} {
     #really shouldn't need anything but the canvas change.\
             think tk_setpalette is the problem, \
             option add won't configure existing widgets but tk_setpalette does.\
-            maybe abstract away from themed::hl_bg?
+            maybe abstract away from themed color variables?
     foreach window [winfo children $mytoplevel] {
       set class [winfo class $window]
       if {$class eq "Button"} {
@@ -562,6 +597,31 @@ proc enact_theme_menu {} {
     themed::configure_the_backgrounds $themed::bg
     themed::configure_misc_options
     dialog_theme::configure_buttons_entries_and_canvases .
+
+    #------------------get rid of this after tk_setpalette is fixed/scrapped-------
+    .theme.labelframe.colbox_e_Overlay configure -background $::themed::active_fg
+    .theme.labelframe.colbox_e_Inlay configure -background $::themed::active_bg
+    .theme.labelframe.colbox_e_Background configure -background $::themed::bg
+    .theme.labelframe.colbox_e_Foreground configure -background $::themed::fg
+    .theme.labelframe.colbox_e_Highlight configure -background $::themed::hl
+    .theme.labelframe.colbox_e_Hl-Background configure -background $::themed::hl_bg
+      #edit^ and run_ mode
+    .theme.labelframe.colbox_r_Overlay configure -background $::themed::trough
+    .theme.labelframe.colbox_r_Inlay configure -background $::themed::sel
+    .theme.labelframe.colbox_r_Background configure -background $::themed::insert_bg
+    .theme.labelframe.colbox_r_Foreground configure -background $::themed::disabled_fg
+    .theme.labelframe.colbox_r_Highlight configure -background $::themed::sel_fg
+    .theme.labelframe.colbox_r_Hl-Background configure -background $::themed::sel_bg
+    set r 0
+    foreach row $::dialog_theme::hexcols {
+      set c 0
+      foreach hexcol $row {
+        .theme.colors.r$r.c$c configure -background $hexcol
+        incr c
+      }
+      incr r
+    }
+    #------------------get rid of this after tk_setpalette is fixed/scrapped-------
   }
 
   #---required placeholder procs---
@@ -577,6 +637,7 @@ proc enact_theme_menu {} {
     }
     unset dialog_theme::palette_colors
     unset dialog_theme::last_checked_checkbutton
+    unset dialog_theme::hexcols
     destroy $gfxstub
   }
   proc dialog_theme::ok {gfxstub} {
