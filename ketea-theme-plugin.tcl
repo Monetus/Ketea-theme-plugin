@@ -347,7 +347,7 @@ proc enact_theme_menu {} {
 
   proc dialog_theme::save_palette_colors_to_file {} {
     #location of file
-    set palette_file [file join $dialog_theme::package_location palette.tcllist]
+    set palette_file [file join $dialog_theme::ketea_loadpath palette.tcllist]
 
     #open a write-only channel to palette.tcllist
     set channel_id [open $palette_file w]
