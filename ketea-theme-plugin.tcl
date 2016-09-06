@@ -16,6 +16,7 @@ package provide ketea 0.0.5
  while they still corellate to options, they should be renamed to describe \
  the edit & run mode changes.  Maybe make an advanced menu?
 namespace eval themed:: {
+  variable ketea_loadpath $::current_plugin_loadpath
   variable bg #ffffff
     variable fg #000000
     variable active_fg #000000
@@ -101,9 +102,9 @@ namespace eval themed:: {
   }
   proc configure_tk_palette {} {
     #BUG: this is causing a buildup of the hexcols and theme button displays \
-      in a list that are configured on every apply press..?\
-        wtf, must find a way to fix.\
-        This shit messes up other dialogWindows' hexcols as well.
+      in a list that is configured on every apply press\
+        This shit messes up other dialogWindows' hexcols as well.\
+        didn't fix, but compensated by recoloring everything...
 
     # notice that insertbackground is hl for the sake of the cursor\
               and disabledForeground is fg for the sake of dialogWindow text\
@@ -233,7 +234,7 @@ proc overwrite_pd_color_procs {} {
     scan $themed::bg #%2x%2x%2x BGr BGg BGb
 
     # divide by twenty three to give a little extra room, make sure its a float and the bounds are 0-255\
-          times -1 to decr instead of incr
+          negative to decr instead of incr
     set FGr_i [expr {int( ($FGr-$BGr) / -23.)}]
     set FGg_i [expr {int( ($FGg-$BGg) / -23.)}]
     set FGb_i [expr {int( ($FGb-$BGb) / -23.)}]
@@ -311,10 +312,10 @@ proc overwrite_pd_color_procs {} {
 proc enact_theme_menu {} {
   # look into whether the c ties are necessary
 
-  namespace eval dialog_theme:: {variable ketea_loadpath $::current_plugin_loadpath}
+  namespace eval dialog_theme:: {}
   #-----load and save configuration file--------
   proc dialog_theme::load_palette_colors_from_file {} {
-    set palette_file [file join $dialog_theme::ketea_loadpath palette.tcllist]
+    set palette_file [file join $themed::ketea_loadpath palette.tcllist]
     if {[file isfile $palette_file]} {
       #open a read-only channel to palette.tcllist
       set channel_id [open $palette_file r]
@@ -341,13 +342,13 @@ proc enact_theme_menu {} {
       #themed::configure_the_backgrounds $themed::bg
       #themed::configure_misc_options
       #overwrite_pd_color_procs
-      #dialog_theme::configure_buttons_entries_and_canvases .
+      #dialog_theme::configure_buttons_entries_canvases_and_hexcols .
     }
   }
 
   proc dialog_theme::save_palette_colors_to_file {} {
     #location of file
-    set palette_file [file join $dialog_theme::ketea_loadpath palette.tcllist]
+    set palette_file [file join $themed::ketea_loadpath palette.tcllist]
 
     #open a write-only channel to palette.tcllist
     set channel_id [open $palette_file w]
@@ -414,7 +415,7 @@ proc enact_theme_menu {} {
     #if this foreach pair looks weird its because the variables r, hexcols, & i are being instantiated \
         with a list to iterate through.  Very nifty foreach in tcl.
 
-    foreach r {0 1 2} hexcols $::dialog_theme::hexcols \
+    foreach r {1 2 3} hexcols $::dialog_theme::hexcols \
     {
       frame $mytoplevel.colors.r$r
       grid $mytoplevel.colors.r$r -sticky n
@@ -547,10 +548,9 @@ proc enact_theme_menu {} {
     }
   }
 
-  proc dialog_theme::configure_buttons_entries_and_canvases {mytoplevel} {
+  proc dialog_theme::configure_buttons_entries_canvases_and_hexcols {mytoplevel} {
     #really shouldn't need anything but the canvas change.\
-            think tk_setpalette is the problem, \
-            option add won't configure existing widgets but tk_setpalette does.\
+            but tk_setpalette is the problem,\
             maybe abstract away from themed color variables?
     foreach window [winfo children $mytoplevel] {
       set class [winfo class $window]
@@ -561,8 +561,20 @@ proc enact_theme_menu {} {
         $window configure -highlightbackground $themed::bg
       } elseif {$class eq "PatchWindow"} {
         themed::configure_upon_editmode $window
+      } elseif {$class eq "DialogWindow"} {
+        if {[winfo exists $window.colors.r1.c0]} {
+          set r 1
+          foreach row $::dialog_theme::hexcols {
+            set c 0
+            foreach hexcol $row {
+              $window.colors.r$r.c$c configure -background $hexcol
+              incr c
+            }
+            incr r
+          }
+        }
       }
-      dialog_theme::configure_buttons_entries_and_canvases $window
+      dialog_theme::configure_buttons_entries_canvases_and_hexcols $window
     }
   }
 
@@ -586,7 +598,7 @@ proc enact_theme_menu {} {
     themed::configure_tk_palette
     themed::configure_the_backgrounds $themed::bg
     themed::configure_misc_options
-    dialog_theme::configure_buttons_entries_and_canvases .
+    dialog_theme::configure_buttons_entries_canvases_and_hexcols .
 
     #------------------get rid of this after tk_setpalette is fixed/scrapped-------
     .theme.labelframe.colbox_e_Overlay configure -background $::themed::active_fg
@@ -602,15 +614,6 @@ proc enact_theme_menu {} {
     .theme.labelframe.colbox_r_Foreground configure -background $::themed::disabled_fg
     .theme.labelframe.colbox_r_Highlight configure -background $::themed::sel_fg
     .theme.labelframe.colbox_r_Hl-Background configure -background $::themed::sel_bg
-    set r 0
-    foreach row $::dialog_theme::hexcols {
-      set c 0
-      foreach hexcol $row {
-        .theme.colors.r$r.c$c configure -background $hexcol
-        incr c
-      }
-      incr r
-    }
     #------------------get rid of this after tk_setpalette is fixed/scrapped-------
   }
 
@@ -643,6 +646,14 @@ proc enact_theme_menu {} {
   dialog_theme::load_palette_colors_from_file
   bind all <$::modifier-Key-\'> {+dialog_theme::create_dialog .theme}
 }
+
+#---autocomplete-----------------
+set objects_file [file join $themed::ketea_loadpath objects.tcl]
+if {[file exists $objects_file]} {
+  source $objects_file
+}
+unset objects_file
+#--------------------------------
 
 enact_theme_menu; #this must come before overwriting the procs, or they will have the wrong color in the pdwindow
 overwrite_pd_color_procs
