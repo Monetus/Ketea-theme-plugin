@@ -671,7 +671,7 @@ proc overwrite_pd_color_procs {} {
           set obj_and_args "$autocomplete::current_object $autocomplete::current_object_args"
           autocomplete::create_autotext $obj_and_args $y_iter
           incr y_iter $::dialog_font::fontsize
-          set text_width [expr [string length $obj_and_args] * int($::dialog_font::fontsize*0.75)]
+          set text_width [expr {[string length $obj_and_args] * int($::dialog_font::fontsize*0.75)}]
           if {$text_width > $autobox_size} {
             set autobox_size $text_width
           }
@@ -830,3 +830,6 @@ proc overwrite_pd_color_procs {} {
       }
   }
 }
+
+
+bind all <Tab> {+puts "%W \n"}
