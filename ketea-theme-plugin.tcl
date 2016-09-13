@@ -10,7 +10,7 @@ package require pdtk_text
 package require pdwindow
 package require pd_menucommands
 
-package provide ketea 0.0.5
+package provide ketea 0.0.6
 
 #I've taken to just reassigning the colors, but its definitely confusing because,\
  while they still corellate to options, they should be renamed to describe \
