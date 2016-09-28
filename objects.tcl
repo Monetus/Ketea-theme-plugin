@@ -830,6 +830,3 @@ proc overwrite_pd_color_procs {} {
       }
   }
 }
-
-
-bind all <Tab> {+puts "%W \n"}
