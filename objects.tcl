@@ -157,6 +157,7 @@ namespace eval autocomplete:: {
     filledpolygon\
     plot\
     drawnumber\
+    drawsymbol\
     pointer\
     get\
     {set}\
@@ -400,6 +401,7 @@ namespace eval autocomplete:: {
     {?-n ?-v ?var ?-x rbg_in rgb_out width x y...}\
     {?-n ?-v ?var ?-vs ?const||var ?-x ?-y ?-w ?curve name rbg x y spacing...}\
     {?-n ?-v ?var number x y rgb ?label}\
+    {?-n ?-v ?var symbol x y rgb ?label}\
     {?template...}\
     {?template ?field...}\
     {?-symbol ?template ?field...}\
