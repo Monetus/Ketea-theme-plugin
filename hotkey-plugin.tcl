@@ -122,7 +122,7 @@ proc delete_binding {bind_tag key_combination binding} {
     bind $bind_tag <$key_combination> "$all_bindings"
   }
 }
-
+  # You'd use this like:   delete_binding all Key-n "hotkeys::create_metro %W"
 #  Sadly this proc still suffers because of the way it searches and deletes the   \
   binding from the list of all bindings.  Regular expressions aren't my strong suit.
 
