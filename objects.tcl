@@ -701,25 +701,24 @@ proc overwrite_pd_color_procs {} {
     }
   }
 
-  proc pdtk_text_editing {mytoplevel tag editing} {
-      set tkcanvas [tkcanvas_name $mytoplevel]
-      set autocomplete::position 127
-      if {$editing == 0} {
-        $tkcanvas delete autobox
-        $tkcanvas delete autotext
-        set autocomplete::tags ""
-        selection clear $tkcanvas
-      } else {
-        set autocomplete::last_canvas $tkcanvas
-        # R for the obj instead of the text's width
-        set coords [$tkcanvas bbox ${tag}R]
-        set autocomplete::x1 [lindex $coords 0]
-        set autocomplete::x2 [lindex $coords 2]
-        set autocomplete::y1 [lindex $coords 3]
-      }
-      $tkcanvas focus $tag
-      set ::editingtext($mytoplevel) $editing
+  set pdtk_text_editing_args [info args pdtk_text_editing]
+  set pdtk_text_editing_body [info body pdtk_text_editing]
+  append pdtk_text_editing_body {
+    set autocomplete::position 127
+    if {$editing == 0} {
+      $tkcanvas delete autobox
+      $tkcanvas delete autotext
+      set autocomplete::tags ""
+    } else {
+      set autocomplete::last_canvas $tkcanvas
+      # R for the obj instead of the text's width
+      set coords [$tkcanvas bbox ${tag}R]
+      set autocomplete::x1 [lindex $coords 0]
+      set autocomplete::x2 [lindex $coords 2]
+      set autocomplete::y1 [lindex $coords 3]
+    }
   }
+  proc pdtk_text_editing "$pdtk_text_editing_args" "$pdtk_text_editing_body"
 
   proc pdtk_text_new {tkcanvas tags x y text font_size color} {
     $tkcanvas create text $x $y -tags $tags -text $text -fill $themed::fg \
@@ -737,70 +736,19 @@ proc overwrite_pd_color_procs {} {
     }
   }
 
-  proc pdtk_canvas_new {mytoplevel width height geometry editable} {
-      set l [pdtk_canvas_place_window $width $height $geometry]
-      set width [lindex $l 0]
-      set height [lindex $l 1]
-      set geometry [lindex $l 2]
-
-      # release the window grab here so that the new window will
-      # properly get the Map and FocusIn events when its created
-      ::pdwindow::busyrelease
-      # set the loaded array for this new window so things can track state
-      set ::loaded($mytoplevel) 0
-      toplevel $mytoplevel -width $width -height $height -class PatchWindow
-      wm group $mytoplevel .
-      $mytoplevel configure -menu $::patch_menubar
-
-      # we have to wait until $mytoplevel exists before we can generate
-      # a <<Loading>> event for it, that's why this is here and not in the
-      # started_loading_file proc.  Perhaps this doesn't make sense tho
-      event generate $mytoplevel <<Loading>>
-
-      wm geometry $mytoplevel $geometry
-      wm minsize $mytoplevel $::canvas_minwidth $::canvas_minheight
-
-      set tkcanvas [tkcanvas_name $mytoplevel]
-      canvas $tkcanvas -width $width -height $height \
-          -highlightthickness 0 -scrollregion [list 0 0 $width $height] \
-          -xscrollcommand "$mytoplevel.xscroll set" \
-          -yscrollcommand "$mytoplevel.yscroll set"
-      scrollbar $mytoplevel.xscroll -orient horizontal -command "$tkcanvas xview"
-      scrollbar $mytoplevel.yscroll -orient vertical -command "$tkcanvas yview"
-      pack $tkcanvas -side left -expand 1 -fill both
-
-      # for some crazy reason, win32 mousewheel scrolling is in units of
-      # 120, and this forces Tk to interpret 120 to mean 1 scroll unit
-      if {$::windowingsystem eq "win32"} {
-          $tkcanvas configure -xscrollincrement 1 -yscrollincrement 1
-      }
-
-      ::pd_bindings::patch_bindings $mytoplevel
-
-      # give focus to the canvas so it gets the events rather than the window
-      focus $tkcanvas
-
-      # let the scrollbar logic determine if it should make things scrollable
-      set ::xscrollable($tkcanvas) 0
-      set ::yscrollable($tkcanvas) 0
-
-      # init patch properties arrays
-      set ::editingtext($mytoplevel) 0
-      set ::childwindows($mytoplevel) {}
-
-      # this should be at the end so that the window and canvas are all ready
-      # before this variable changes.
-      set ::editmode($mytoplevel) $editable
-
-      #autocomplete bindings - should be in pd_bindings but there is an unexplained error
-      set autocomplete::last_canvas $tkcanvas
-      $tkcanvas bind autotext <Enter> {+$autocomplete::last_canvas itemconfigure current -fill $themed::hl}
-      $tkcanvas bind autotext <Leave> {+autocomplete::hover_leave_color_check}
-      $tkcanvas bind autotext <ButtonPress-1> {+autocomplete::rename_obj_via_click}
-      bind $tkcanvas <Tab> {+autocomplete::cycle_autocomplete_tags}
-      bind $tkcanvas <KeyRelease-Return> {+autocomplete::rename_obj_via_return}
-      # keyrelease so that the return is input before the obj is renamed
+  set pdtk_canvas_new_args [info args pdtk_canvas_new]
+  set pdtk_canvas_new_body [info body pdtk_canvas_new]
+  append pdtk_canvas_new_body {
+    #autocomplete bindings - should be in pd_bindings but there is an unexplained error
+    set autocomplete::last_canvas $tkcanvas
+    $tkcanvas bind autotext <Enter> {+$autocomplete::last_canvas itemconfigure current -fill $themed::hl}
+    $tkcanvas bind autotext <Leave> {+autocomplete::hover_leave_color_check}
+    $tkcanvas bind autotext <ButtonPress-1> {+autocomplete::rename_obj_via_click}
+    bind $tkcanvas <Tab> {+autocomplete::cycle_autocomplete_tags}
+    bind $tkcanvas <KeyRelease-Return> {+autocomplete::rename_obj_via_return}
+    # keyrelease so that the return is input before the obj is renamed
   }
+  proc pdtk_canvas_new "$pdtk_canvas_new_args" "$pdtk_canvas_new_body"
 
   proc ::pd_menucommands::menu_aboutpd {} {
     # parse the textfile for the About Pd page
