@@ -503,7 +503,7 @@ namespace eval autocomplete:: {
   # this highlights one past the end of the list.  fix or keep as a delete?.
   proc cycle_autocomplete_tags {} {
     if {$autocomplete::position < [llength $autocomplete::tags]} {
-      $autocomplete::last_canvas itemconfigure [lindex $autocomplete::tags $autocomplete::position] -fill $themed::active_bg
+      $autocomplete::last_canvas itemconfigure [lindex $autocomplete::tags $autocomplete::position] -fill $themed::active_fg
       incr autocomplete::position
     } else {
       set autocomplete::position 0
@@ -565,7 +565,7 @@ namespace eval autocomplete:: {
   proc create_autotext {text row_adjustment} {
     lappend autocomplete::tags\
       [$autocomplete::last_canvas create text [expr $autocomplete::x1 + 4] [expr $autocomplete::y1 + $row_adjustment]\
-        -text $text -tags autotext -fill $themed::active_bg\
+        -text $text -tags autotext -fill $themed::active_fg\
         -font "$::font_family $::dialog_font::fontsize" -anchor nw]
   }
 
