@@ -565,7 +565,7 @@ namespace eval autocomplete:: {
   proc create_autotext {text row_adjustment} {
     lappend autocomplete::tags\
       [$autocomplete::last_canvas create text [expr $autocomplete::x1 + 4] [expr $autocomplete::y1 + $row_adjustment]\
-        -text $text -tags autotext -fill $themed::active_fg\
+        -text $text -tags autotext -fill $themed::active_bg\
         -font "$::font_family $::dialog_font::fontsize" -anchor nw]
   }
 
