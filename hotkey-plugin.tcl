@@ -23,7 +23,7 @@ bind all <$::modifier-Key-w> {}
 
 # --  Let the coding commence  --
 
-  # you know you'll have to bind to n, create an object, and type into it.  \
+  # you know you'll have to bind to a letter, create an object, and type into it.  \
     so lets get that out of the way.
 
 # the main point of this namespace is to keep the generically named procs \
@@ -92,7 +92,9 @@ namespace eval hotkeys:: {
           z {list }"
   # use the plus sign to keep from erasing other bindings to the key, unless that is what you want
   foreach {letter name} $hotkeys::keybindings {
-    bind all <Key-$letter> "+hotkeys::create_named_obj %W $name"
+    # The quotes are to force interpretation of the variable and\
+    the curly braces are to keep a list as one argument, e.g. metro 100.
+    bind all <Key-$letter> "+hotkeys::create_named_obj %W {$name}"
   }
 }
 
@@ -111,6 +113,7 @@ namespace eval hotkeys:: {
   introspection.
 set overwritten_args [info args pdtk_text_editing]
 set overwritten_body [info body pdtk_text_editing]
+  # braces around all this to keep $editing from being interpeted
 append overwritten_body {
   if {$editing} {
     foreach {letter name} $hotkeys::keybindings {
@@ -118,13 +121,11 @@ append overwritten_body {
     }
   } else {
     foreach {letter name} $hotkeys::keybindings {
-      bind all <Key-$letter> "+hotkeys::create_named_obj %W $name"
+      # yet again, quotes force interpretation, braces to keep the list as one arg
+      bind all <Key-$letter> "+hotkeys::create_named_obj %W {$name}"
     }
   }
 }
-
-# braces on the code above to keep from interpretation, quotes on the proc below \
-  to force it.
 
 proc pdtk_text_editing "$overwritten_args" "$overwritten_body"
 
@@ -138,9 +139,9 @@ unset overwritten_body
     often at all, but you can get the value backwards by confusing the gui.       \
     Thankfully, it isn't much of a bug, as doing much of anything to the gui will \
     reset the value correctly.
-# 2. When editing text, the removal of the binding removes EVERY binding to n and \
-    only resets the metro one.  This isn't a problem for an unused key like n, but\
-    if you wanted to add, then remove, some behavior to an existing hotkey you'd  \
+# 2. When editing text, the removal of the binding removes EVERY binding and \
+    only resets the one.  This isn't a problem for an unused key like n, but \
+    if you wanted to add, then remove, some behavior to an existing hotkey you'd \
     need to selectively delete bindings.  Introspection to the rescue again:
 
 proc delete_binding {bind_tag key_combination binding} {
