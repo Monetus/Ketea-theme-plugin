@@ -781,9 +781,6 @@ proc overwrite_pd_color_procs {} {
   }
     #this is the text edit menu for structs
   set pdtk_data_dialog_args [info args pdtk_data_dialog]
-  set pdtk_data_dialog_body [info body pdtk_data_dialog]
-  append pdtk_data_dialog_body {
-  $mytoplevel.text configure -background $themed::bg -relief flat
-  }
+  set pdtk_data_dialog_body [string map {white $themed::bg raised flat} [info body pdtk_data_dialog]]
   proc ::dialog_data::pdtk_data_dialog "$pdtk_data_dialog_args" "$pdtk_data_dialog_body"
 }
