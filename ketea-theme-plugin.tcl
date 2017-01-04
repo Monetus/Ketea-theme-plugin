@@ -10,7 +10,7 @@ package require pdtk_text
 package require pdwindow
 package require pd_menucommands
 
-package provide ketea 0.0.6
+package provide ketea 0.0.7
 
 #I've taken to just reassigning the colors, but its definitely confusing because,\
  while they still corellate to options, they should be renamed to describe \
@@ -192,127 +192,6 @@ namespace eval themed:: {
   }
 }
 
-proc overwrite_pd_color_procs {} {
-    #overwrite the proc that changes the color of the audio error label
-  proc ::pdwindow::pdtk_pd_dio {red} {
-    if {$red == 1} {
-        .pdwindow.header.ioframe.dio configure -foreground $themed::trough
-    } else {
-        .pdwindow.header.ioframe.dio configure -foreground $themed::bg
-    }
-  }
-
-    #overwrite the proc that changes the color of the tcl_entry menu.
-  proc ::pdwindow::validate_tcl {} {
-    variable tclentry
-    if {[info complete $tclentry]} {
-      .pdwindow.tcl.entry configure -background $themed::bg
-    } else {
-      scan $themed::bg #%2x%2x%2x BGr BGg BGb
-      set BGr [expr {$BGr-($BGr/4)}]
-      set BGg [expr {$BGg-($BGg/4)}]
-      set BGb [expr {$BGb-($BGb/4)}]
-
-      set darker_bg ""
-      append darker_bg #\
-        [string trim [format %02X $BGr]] [string trim [format %02X $BGg]] [string trim [format %02X $BGb]]
-
-      .pdwindow.tcl.entry configure -background $darker_bg
-    }
-  }
-
-    #this is the proc that underlies pdwindow::post, error, debug, & verbose
-  proc ::pdwindow::set_layout {} {
-        # note that the order is fatal, post, debug, verbose
-    variable maxloglevel
-    .pdwindow.text.internal tag configure log0 -foreground $themed::hl -background $themed::hl_bg
-    .pdwindow.text.internal tag configure log1 -foreground $themed::active_fg
-    # log2 messages are the foreground color
-    .pdwindow.text.internal tag configure log3 -foreground $themed::active_bg
-
-    scan $themed::fg #%2x%2x%2x FGr FGg FGb
-    scan $themed::bg #%2x%2x%2x BGr BGg BGb
-
-    # divide by twenty three to give a little extra room, make sure its a float and the bounds are 0-255\
-          negative to decr instead of incr
-    set FGr_i [expr {int( ($FGr-$BGr) / -23.)}]
-    set FGg_i [expr {int( ($FGg-$BGg) / -23.)}]
-    set FGb_i [expr {int( ($FGb-$BGb) / -23.)}]
-
-    # 0-20(4-24) is a rough useful range of 'verbose' levels for impl debugging
-    set start 4
-    set end 25
-
-    for {set i $start} {$i < $end} {incr i} {
-      incr FGr $FGr_i
-      incr FGg $FGg_i
-      incr FGb $FGb_i
-      #format probably could be used once without trimming the whitespace. yet again, badly done.
-      set rgb_hex_bg ""
-      append rgb_hex_bg #\
-        [string trim [format %02X $FGr]] [string trim [format %02X $FGg]] [string trim [format %02X $FGb]]
-      .pdwindow.text.internal tag configure log${i} -foreground $rgb_hex_bg
-    }
-  }
-    #this is apparently called before the guiplugins so you have to call it again.
-  pdwindow::set_layout
-
-    # this triggers for any text change. keep light.
-  proc pdtk_text_set {tkcanvas tag text} {
-    $tkcanvas itemconfigure $tag -text $text -fill $themed::edit_or_runmode_text
-  }
-
-  proc pdtk_text_new {tkcanvas tags x y text font_size color} {
-    $tkcanvas create text $x $y -tags $tags -text $text -fill $themed::fg \
-        -anchor nw -font [get_font_for_size $font_size]
-    set mytag [lindex $tags 0]
-    $tkcanvas bind $mytag <Home> "$tkcanvas icursor $mytag 0"
-    $tkcanvas bind $mytag <End>  "$tkcanvas icursor $mytag end"
-    # select all
-    $tkcanvas bind $mytag <Triple-ButtonRelease-1>  \
-        "pdtk_text_selectall $tkcanvas $mytag"
-    if {$::windowingsystem eq "aqua"} {
-      # emacs bindings for Mac OS X
-        $tkcanvas bind $mytag <Control-a> "$tkcanvas icursor $mytag 0"
-        $tkcanvas bind $mytag <Control-e> "$tkcanvas icursor $mytag end"
-    }
-  }
-
-  proc ::pd_menucommands::menu_aboutpd {} {
-    # parse the textfile for the About Pd page
-      set versionstring "Pd $::PD_MAJOR_VERSION.$::PD_MINOR_VERSION.$::PD_BUGFIX_VERSION$::PD_TEST_VERSION"
-      set filename "$::sys_libdir/doc/1.manual/1.introduction.txt"
-      if {[winfo exists .aboutpd]} {
-          wm deiconify .aboutpd
-          raise .aboutpd
-      } else {
-          toplevel .aboutpd -class TextWindow
-          wm title .aboutpd [_ "About Pd"]
-          wm group .aboutpd .
-          .aboutpd configure -menu $::dialog_menubar
-          text .aboutpd.text -relief flat -borderwidth 0 \
-              -yscrollcommand ".aboutpd.scroll set" -background $themed::bg -selectforeground $themed::hl
-          scrollbar .aboutpd.scroll -command ".aboutpd.text yview"
-          pack .aboutpd.scroll -side right -fill y
-          pack .aboutpd.text -side left -fill both -expand 1
-          bind .aboutpd <$::modifier-Key-w>   "wm withdraw .aboutpd"
-
-          set textfile [open $filename]
-          while {![eof $textfile]} {
-              set bigstring [read $textfile 1000]
-              regsub -all PD_BASEDIR $bigstring $::sys_guidir bigstring2
-              regsub -all PD_VERSION $bigstring2 $versionstring bigstring3
-              .aboutpd.text insert end $bigstring3
-          }
-          close $textfile
-      }
-  }
-    #this is the text edit menu for structs
-  set pdtk_data_dialog_args [info args pdtk_data_dialog]
-  set pdtk_data_dialog_body [string map {white $themed::bg raised flat} [info body pdtk_data_dialog]]
-  proc ::dialog_data::pdtk_data_dialog "$pdtk_data_dialog_args" "$pdtk_data_dialog_body"
-}
-
 proc enact_theme_menu {} {
   # look into whether the c ties are necessary
 
@@ -345,7 +224,6 @@ proc enact_theme_menu {} {
       #themed::configure_tk_palette
       #themed::configure_the_backgrounds $themed::bg
       #themed::configure_misc_options
-      #overwrite_pd_color_procs
       #dialog_theme::configure_buttons_entries_canvases_and_hexcols .
     }
   }
@@ -393,7 +271,7 @@ proc enact_theme_menu {} {
 
   proc dialog_theme::set_hexcolor_bg_by_swatch {} {
     set chosen_color\
-      [tk_chooseColor -title [_ "Pick a Color"] -initialcolor [lindex $dialog_theme::last_checked_checkbutton 1]]
+      [tk_chooseColor -title "Pick a Color" -initialcolor [lindex $dialog_theme::last_checked_checkbutton 1]]
     if {$chosen_color ne ""} {
       dialog_theme::set_hexcolor_bg $chosen_color
     }
@@ -407,10 +285,10 @@ proc enact_theme_menu {} {
   }
 
   proc dialog_theme::create_hexcolors {mytoplevel} {
-    labelframe $mytoplevel.colors -borderwidth 1 -text [_ "Colors"] -padx 5 -pady 5\
+    labelframe $mytoplevel.colors -borderwidth 1 -text "Colors" -padx 5 -pady 5\
       -relief groove -labelanchor n
     grid $mytoplevel.colors -row $::dialog_theme::row_iterator -columnspan 3
-    button $mytoplevel.colors.swatch_button -text [_ "Palette"]\
+    button $mytoplevel.colors.swatch_button -text "Palette"\
       -command dialog_theme::set_hexcolor_bg_by_swatch
     grid $mytoplevel.colors.swatch_button -row $::dialog_theme::row_iterator
 
@@ -435,15 +313,15 @@ proc enact_theme_menu {} {
   }
 
   proc dialog_theme::add_theme_buttons {mytoplevel} {
-    label $mytoplevel.label_e -text [_ "edit"]
-    label $mytoplevel.label_r -text [_ "run"]
+    label $mytoplevel.label_e -text "edit"
+    label $mytoplevel.label_r -text "run"
     grid configure $mytoplevel.label_e -column 1 -row 0
     grid configure $mytoplevel.label_r -column 2 -row 0
 
     foreach {color e_val r_val} $dialog_theme::palette_colors {
       variable ::dialog_theme::check1_val_$color 0
       variable ::dialog_theme::check2_val_$color 0
-      label $mytoplevel.label_$color -text [_ "$color"]
+      label $mytoplevel.label_$color -text "$color"
       label $mytoplevel.colbox_e_$color -background $e_val -relief ridge -width 2
       label $mytoplevel.colbox_r_$color -background $r_val -relief ridge -width 2
       checkbutton $mytoplevel.check1_$color -variable ::dialog_theme::check1_val_$color\
@@ -489,11 +367,11 @@ proc enact_theme_menu {} {
       labelframe $gfxstub.labelframe -text "Choose your palette"\
         -relief groove -padx 5 -pady 5 -labelanchor n -takefocus 1
 
-      button $gfxstub.save -text [_ "save"]\
+      button $gfxstub.save -text "save"\
         -command {dialog_theme::ok .theme}
-      button $gfxstub.apply -text [_ "apply"]\
+      button $gfxstub.apply -text "apply"\
         -command {dialog_theme::apply .theme}
-      button $gfxstub.cancel -text [_ "cancel"]\
+      button $gfxstub.cancel -text "cancel"\
         -command {dialog_theme::cancel .theme}
         # the gfxstub variable will have been unset, you have to be specific
         #   and say .theme for the command's argument
@@ -503,7 +381,7 @@ proc enact_theme_menu {} {
       dialog_theme::create_hexcolors $gfxstub
       #check keybindings
 
-      wm title $gfxstub [_ "Theme"]
+      wm title $gfxstub "Theme"
       wm minsize $gfxstub 282 475
       wm maxsize $gfxstub 282 475
       wm resizable $gfxstub 0 0
@@ -597,7 +475,7 @@ proc enact_theme_menu {} {
     set ::themed::sel_fg [lindex [.theme.labelframe.colbox_r_Highlight configure -background] 4]
     set ::themed::sel_bg [lindex [.theme.labelframe.colbox_r_Hl-Background configure -background] 4]
 
-    overwrite_pd_color_procs
+    ::pdwindow::set_layout
 
     themed::configure_tk_palette
     themed::configure_the_backgrounds $themed::bg
@@ -644,12 +522,114 @@ proc enact_theme_menu {} {
   }
   #---required placeholder procs---
 
-  .menubar.edit insert 9 command -label [_ "Theme"]\
+  .menubar.edit insert 9 command -label "Theme"\
     -command {dialog_theme::create_dialog .theme}
 
   dialog_theme::load_palette_colors_from_file
   bind all <$::modifier-Key-\'> {+dialog_theme::create_dialog .theme}
 }
+enact_theme_menu; #this must come before overwriting the procs, or they will have the wrong color in the pdwindow
+
+#--------overwrite-procs---------
+# Change the color of the audio error label in the pdwindow
+set pdtk_pd_dio_args [info args ::pdwindow::pdtk_pd_dio]
+set pdtk_pd_dio_body\
+  [string map\
+    {\
+      {-foreground red}\
+      {-foreground $themed::trough}\
+      {-foreground lightgray}\
+      {-foreground $themed::bg}\
+    } [info body pdwindow::pdtk_pd_dio]\
+  ]
+proc ::pdwindow::pdtk_pd_dio "$pdtk_pd_dio_args" "$pdtk_pd_dio_body"
+unset pdtk_pd_dio_args pdtk_pd_dio_body
+
+# Changes the color of the tcl_entry menu, the place where you type in the pdwindow.
+set validate_tcl_args [info args pdwindow::validate_tcl]
+set validate_tcl_body\
+  [string map\
+    {\
+      {white} {$themed::bg}
+      {.pdwindow.tcl.entry configure -background "#FFF0F0"}\
+      {scan $themed::bg #%2x%2x%2x BGr BGg BGb
+      set BGr [expr {$BGr-($BGr/4)}]
+      set BGg [expr {$BGg-($BGg/4)}]
+      set BGb [expr {$BGb-($BGb/4)}]
+      set darker_bg [format #%02X%02X%02X $BGr $BGg $BGb]
+      .pdwindow.tcl.entry configure -background $darker_bg}\
+    } [info body pdwindow::validate_tcl]\
+  ]
+proc ::pdwindow::validate_tcl "$validate_tcl_args" "$validate_tcl_body"
+unset validate_tcl_args validate_tcl_body
+
+# Change the colors of the text posted to the pdwindow
+  # This is the proc that underlies pdwindow::post, error, debug, & verbose
+  # It may be more readable to just overwrite the proc with the changes, but \
+  might as well be consistent with using introspection to do that.
+    # yes, even the comment about log2 is being replaced
+set set_layout_body {
+  scan $themed::fg #%2x%2x%2x FGr FGg FGb
+  scan $themed::bg #%2x%2x%2x BGr BGg BGb
+  # divide by twenty three to give a little extra room, make sure its a float and the bounds are 0-255\
+        negative to decr instead of incr
+  set FGr_i [expr {int( ($FGr-$BGr) / -23.)}]
+  set FGg_i [expr {int( ($FGg-$BGg) / -23.)}]
+  set FGb_i [expr {int( ($FGb-$BGb) / -23.)}]
+
+  # note that the order is fatal, post, debug, verbose
+}
+append set_layout_body\
+ [string map\
+    {\
+      {log0 -foreground "#d00" -background "#ffe0e8"}\
+      {log0 -foreground $themed::hl -background $themed::hl_bg}\
+      {log1 -foreground "#d00"}\
+      {log1 -foreground $themed::active_fg}\
+      {normal black on white}\
+      {the standard foreground color}\
+      {log3 -foreground "#484848"}\
+      {log3 -foreground $themed::active_bg}\
+      {set B [expr int(($i - $start) * (40 / ($end - $start))) + 50]
+        .pdwindow.text.internal tag configure log${i} -foreground grey${B}}\
+      {incr FGr $FGr_i
+        incr FGg $FGg_i
+        incr FGb $FGb_i
+        set rgb_hex_fg [format #%02X%02X%02X $FGr $FGg $FGb]
+        .pdwindow.text.internal tag configure log${i} -foreground $rgb_hex_fg}\
+    } [info body pdwindow::set_layout]\
+  ]
+set set_layout_args [info args pdwindow::set_layout]
+proc ::pdwindow::set_layout "$set_layout_args" "$set_layout_body"
+unset set_layout_args set_layout_body
+
+# Add a fill color to newly typed text in an obj
+  # this triggers for any text change. keep light.
+set pdtk_text_set_args [info args pdtk_text_set]
+set pdtk_text_set_body [string trimright [info body pdtk_text_set]]
+append pdtk_text_set_body { -fill $themed::edit_or_runmode_text}
+proc pdtk_text_set "$pdtk_text_set_args" "$pdtk_text_set_body"
+unset pdtk_text_set_args pdtk_text_set_body
+
+# Change the inital color of text in a created obj
+set pdtk_text_new_args [info args pdtk_text_new]
+set pdtk_text_new_body [string map {color themed::fg} [info body pdtk_text_new]]
+proc pdtk_text_new "$pdtk_text_new_args" "$pdtk_text_new_body"
+unset pdtk_text_new_args pdtk_text_new_body
+
+# Change the colors of the text widget in the aboutpd menu
+set menu_aboutpd_args [info args pd_menucommands::menu_aboutpd]
+set menu_aboutpd_body [string map {white {$themed::bg -selectforeground $themed::hl}}\
+  [info body pd_menucommands::menu_aboutpd]]
+proc ::pd_menucommands::menu_aboutpd "$menu_aboutpd_args" "$menu_aboutpd_body"
+unset menu_aboutpd_args menu_aboutpd_body
+
+# Change the background color and relief of the text edit menu for structs
+set pdtk_data_dialog_args [info args pdtk_data_dialog]
+set pdtk_data_dialog_body [string map {white $themed::bg raised flat} [info body pdtk_data_dialog]]
+proc ::dialog_data::pdtk_data_dialog "$pdtk_data_dialog_args" "$pdtk_data_dialog_body"
+unset pdtk_data_dialog_args pdtk_data_dialog_body
+#-------end-overwrite------------
 
 #---autocomplete-----------------
 set objects_file [file join $themed::ketea_loadpath objects.tcl]
@@ -659,8 +639,7 @@ if {[file exists $objects_file]} {
 unset objects_file
 #--------------------------------
 
-enact_theme_menu; #this must come before overwriting the procs, or they will have the wrong color in the pdwindow
-overwrite_pd_color_procs
+::pdwindow::set_layout; # called before guiplugins, call again for new colors
 themed::configure_tk_palette
 themed::configure_the_backgrounds $themed::bg
 themed::configure_misc_options
