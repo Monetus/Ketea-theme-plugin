@@ -1,0 +1,244 @@
+vanilla {
+	{!=} : {?float}
+	{%} : {?float}
+	{&} : {?float}
+	{&&} : {?float}
+	{*} : {?float}
+	{*~} : {?float}
+	{+} : {?float}
+	{+~} : {?float}
+	{-} : {?float}
+	{-~} : {?float}
+	{/} : {?float}
+	{/~} : {?float}
+	{<} : {?float}
+	{<<} : {integer}
+	{<=} : {?float}
+	{==} : {?float}
+	{>} : {?float}
+	{>=} : {?float}
+	{>>} : {integer}
+	{abs} : {}
+	{abs~} : {}
+	{adc~} : {?channel...}
+	{append} : {?template ?field...}
+	{array} : {}
+	{array define} : {?-k ?name ?size}
+	{array get} : {?name ?onset ?points}
+	{array max} : {?name ?onset ?points}
+	{array min} : {?name ?onset ?points}
+	{array quantile} : {?name ?onset ?points}
+	{array random} : {?name ?onset ?points}
+	{array set} : {?name}
+	{array size} : {?-s ?-f ?name}
+	{array sum} : {?name ?onset ?points}
+	{atan} : {}
+	{atan2} : {}
+	{bag} : {}
+	{bang} : {}
+	{bang~} : {}
+	{bendin} : {?channel}
+	{bendout} : {}
+	{biquad~} : {?fb1 ?fb2 ?ff1 ?ff2 ?ff3}
+	{block~} : {?blocksize ?overlap ?up/downsampling}
+	{bob~} : {}
+	{bonk~} : {}
+	{bp~} : {?frequency ?resonance}
+	{catch~} : {name}
+	{change} : {?float}
+	{choice} : {?repetition}
+	{clip} : {?min ?max}
+	{clip~} : {?min ?max}
+	{clone} : {?-s <arg> ?-x ?filename ?instances ?args...}
+	{cos} : {}
+	{cos~} : {}
+	{cpole~} : {?float ?float}
+	{cputime} : {}
+	{ctlin} : {?control ?channel}
+	{ctlout} : {?control ?channel}
+	{czero_rev~} : {?float ?float}
+	{czero~} : {?float ?float}
+	{dac~} : {?channel...}
+	{dbtopow} : {}
+	{dbtorms} : {}
+	{dbtorms~} : {}
+	{declare} : {(-path -stdpath -lib -stdlib) name}
+	{delay} : {?time ?tempo ?unit}
+	{delread4~} : {?name}
+	{delread~} : {?name ?time}
+	{delwrite~} : {?name ?time}
+	{div} : {?float}
+	{drawcurve} : {?-n ?-v ?var ?-x rbg width x y...}
+	{drawnumber} : {?-n ?-v ?var number x y rgb ?label}
+	{drawpolygon} : {?-n ?-v ?var ?-x rbg width x y...}
+	{drawsymbol} : {?-n ?-v ?var symbol x y rgb ?label}
+	{element} : {?template ?field...}
+	{env~} : {?window ?period}
+	{exp} : {}
+	{expr} : {?$f# ?math ?array[index]}
+	{expr~} : {?$v# ?$f# ?math ?array[index]}
+	{exp~} : {}
+	{fexpr~} : {?$x[index] ?$y[index] ?math}
+	{fft~} : {}
+	{filledcurve} : {?-n ?-v ?var ?-x rgb_in rbg_out width x y...}
+	{filledpolygon} : {?-n ?-v ?var ?-x rbg_in rgb_out width x y...}
+	{float} : {?float}
+	{framp~} : {}
+	{ftom} : {}
+	{ftom~} : {}
+	{get} : {?template ?field...}
+	{getsize} : {?template ?field}
+	{hilbert~} : {}
+	{hip~} : {?frequency}
+	{ifft~} : {}
+	{inlet} : {?name}
+	{inlet~} : {?name}
+	{int} : {?integer}
+	{key} : {}
+	{keyname} : {}
+	{keyup} : {}
+	{line} : {?float ?grain}
+	{line~} : {}
+	{list} : {}
+	{list append} : {?list}
+	{list fromsymbol} : {}
+	{list length} : {}
+	{list prepend} : {?list}
+	{list split} : {?integer}
+	{list tosymbol} : {}
+	{list trim} : {}
+	{loadbang} : {}
+	{log} : {}
+	{log~} : {}
+	{loop~} : {}
+	{lop~} : {?frequency}
+	{lrshift~} : {?shift}
+	{makefilename} : {format}
+	{makenote} : {?velocity ?duration}
+	{max} : {?float}
+	{max~} : {?float}
+	{metro} : {?time ?tempo ?unit}
+	{midiclkin} : {}
+	{midiin} : {}
+	{midiout} : {}
+	{midirealtimein} : {}
+	{min} : {?float}
+	{min~} : {?float}
+	{mod} : {?integer}
+	{moses} : {?float}
+	{mtof} : {}
+	{mtof~} : {}
+	{namecanvas} : {name}
+	{netreceive} : {?-u ?-b ?port}
+	{netsend} : {?-u ?-b}
+	{noise~} : {}
+	{notein} : {?channel}
+	{noteout} : {}
+	{openpanel} : {}
+	{oscformat} : {?address...}
+	{oscparse} : {}
+	{osc~} : {?frequency}
+	{outlet} : {?name}
+	{outlet~} : {?name}
+	{pack} : {?f||s||p...}
+	{pd~} : {?-insig -outsig -sr -fifo? <integer> ?-pddir -scheddir? <path>}
+	{pgmin} : {?channel}
+	{pgmout} : {}
+	{phasor~} : {?frequency}
+	{pipe} : {?time...}
+	{plot} : {?-n ?-v ?var ?-vs ?const||var ?-x ?-y ?-w ?curve name rbg x y spacing...}
+	{pointer} : {?template...}
+	{poly} : {?voices ?stealing}
+	{polytouchin} : {?channel}
+	{polytouchout} : {}
+	{pow} : {?float}
+	{powtodb} : {}
+	{pow~} : {}
+	{print} : {?name}
+	{print~} : {?name}
+	{q8_rsqrt~} : {}
+	{q8_sqrt~} : {}
+	{qlist} : {}
+	{random} : {?integer}
+	{readsf~} : {?channels ?buffer}
+	{realtime} : {}
+	{receive} : {name}
+	{receive~} : {?name}
+	{rev1~} : {}
+	{rev2~} : {?dB ?liveness ?frequency ?damping}
+	{rev3~} : {?dB ?liveness ?frequency ?damping}
+	{rfft~} : {}
+	{rifft~} : {}
+	{rmstodb} : {}
+	{rmstodb~} : {}
+	{route} : {?float||symbol...}
+	{rpole~} : {?float}
+	{rsqrt~} : {}
+	{rzero_rev~} : {?float}
+	{rzero~} : {?float}
+	{samphold~} : {}
+	{samplerate~} : {}
+	{savepanel} : {}
+	{scalar} : {?define ?-k ?template ?name}
+	{select} : {?float||symbol...}
+	{send} : {?name}
+	{send~} : {name}
+	{set} : {?-symbol ?template ?field...}
+	{setsize} : {?template ?field}
+	{sigmund~} : {?-t ?pitch ?notes ?env ?peaks ?tracks ?(-npts -hop -npeak -maxfreq -vibrato -stabletime -minpower -growth) <arg>}
+	{sig~} : {?float}
+	{sin} : {}
+	{snapshot~} : {}
+	{soundfiler} : {}
+	{spigot} : {?integer}
+	{sqrt} : {}
+	{sqrt~} : {}
+	{stdout} : {}
+	{stripnote} : {}
+	{struct} : {?name ?type ?var...}
+	{swap} : {?float}
+	{switch~} : {?blocksize ?overlap ?up/downsampling}
+	{symbol} : {?symbol}
+	{sysexin} : {}
+	{table} : {?name ?size}
+	{tabosc4~} : {?name}
+	{tabplay~} : {?name}
+	{tabread} : {?name}
+	{tabread4} : {?name}
+	{tabread4~} : {?name}
+	{tabread~} : {?name}
+	{tabreceive~} : {?name}
+	{tabsend~} : {?name}
+	{tabwrite} : {?name}
+	{tabwrite~} : {?name}
+	{tan} : {}
+	{text} : {}
+	{text define} : {?-k name}
+	{text delete} : {?name||?-s template?}
+	{text fromlist} : {?name||?-s template?}
+	{text get} : {?name ?onset ?points}
+	{text search} : {?name||?-s template ?operator ?field}
+	{text sequence} : {?name||?-s template ?-g ?-w symbol||integer ?-t tempo units}
+	{text set} : {?name||?-s template? ?line ?field}
+	{text size} : {?name||?-s template?}
+	{text tolist} : {?name||?-s template?}
+	{textfile} : {}
+	{threshold~} : {?trigger ?ttime ?rest ?rtime}
+	{throw~} : {?name}
+	{timer} : {?tempo ?unit}
+	{touchin} : {?channel}
+	{touchout} : {}
+	{trigger} : {b||f||s||p||a...}
+	{unpack} : {?f||s||p...}
+	{until} : {}
+	{value} : {?name}
+	{vcf~} : {?frequency ?resonance}
+	{vd~} : {?name}
+	{vline~} : {}
+	{vsnapshot~} : {}
+	{wrap} : {}
+	{wrap~} : {}
+	{writesf~} : {?channels}
+	{|} : {?float}
+	{||} : {?float}
+}

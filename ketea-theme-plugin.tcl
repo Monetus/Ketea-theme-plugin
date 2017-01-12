@@ -1,7 +1,7 @@
 # META NAME ketea-theme-plugin
 # META DESCRIPTION the ketea-theme-plugin provides a theme for pure data
 # META AUTHOR monetus
-# META VERSION 0.0.5
+# META VERSION 0.0.7
 # META LICENSE "Standard Improved BSD License", "BSD 3-Clause License"
 
 package require Tk 8.4
@@ -284,10 +284,10 @@ proc enact_theme_menu {} {
     }
   }
 
-  proc dialog_theme::create_hexcolors {mytoplevel} {
+  proc dialog_theme::create_hexcolors {mytoplevel column} {
     labelframe $mytoplevel.colors -borderwidth 1 -text "Colors" -padx 5 -pady 5\
       -relief groove -labelanchor n
-    grid $mytoplevel.colors -row $::dialog_theme::row_iterator -columnspan 3
+    grid $mytoplevel.colors -row $::dialog_theme::row_iterator -column $column -columnspan 3
     button $mytoplevel.colors.swatch_button -text "Palette"\
       -command dialog_theme::set_hexcolor_bg_by_swatch
     grid $mytoplevel.colors.swatch_button -row $::dialog_theme::row_iterator
@@ -376,9 +376,10 @@ proc enact_theme_menu {} {
         # the gfxstub variable will have been unset, you have to be specific
         #   and say .theme for the command's argument
 
+        # This variable is incremented in the procs immediately below it
       set ::dialog_theme::row_iterator 1
       dialog_theme::add_theme_buttons $gfxstub.labelframe
-      dialog_theme::create_hexcolors $gfxstub
+      dialog_theme::create_hexcolors $gfxstub 0
       #check keybindings
 
       wm title $gfxstub "Theme"
@@ -411,6 +412,7 @@ proc enact_theme_menu {} {
       grid $gfxstub.apply -column 1 -columnspan 1 -row $::dialog_theme::row_iterator -ipadx 2 -pady 4 -sticky s
       grid $gfxstub.cancel -column 0 -columnspan 1 -row $::dialog_theme::row_iterator -pady 4 -sticky s
       grid $gfxstub.labelframe -column 0 -columnspan 3 -row 0 -rowspan 3 -sticky new
+
 
       unset ::dialog_theme::row_iterator
 
@@ -632,11 +634,11 @@ unset pdtk_data_dialog_args pdtk_data_dialog_body
 #-------end-overwrite------------
 
 #---autocomplete-----------------
-set objects_file [file join $themed::ketea_loadpath objects.tcl]
-if {[file exists $objects_file]} {
-  source $objects_file
-}
-unset objects_file
+#set objects_file [file join $themed::ketea_loadpath objects.tcl]
+#if {[file exists $objects_file]} {
+#  source $objects_file
+#}
+#unset objects_file
 #--------------------------------
 
 ::pdwindow::set_layout; # called before guiplugins, call again for new colors
